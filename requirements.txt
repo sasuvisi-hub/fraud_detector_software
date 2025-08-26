@@ -63,4 +63,5 @@ jupyter>=1.0.0
 ipykernel>=6.15.0
 
 xlrd
-plotly
+chardet
+statsmodels
