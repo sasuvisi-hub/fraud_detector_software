@@ -2,38 +2,34 @@
 API Utilities Module
 Handles checking API availability and providing demo data
 """
-import yaml
-import os
+import streamlit as st # <-- Import Streamlit
 import logging
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+
 logger = logging.getLogger(__name__)
 
 def is_api_available(service_name):
     """
-    Check if an API service is available
+    Check if an API service is available from Streamlit Secrets.
     
     Args:
-        service_name (str): Name of the service (e.g., 'gemini', 'openai', 'news_api')
+        service_name (str): Name of the service key in st.secrets (e.g., 'gemini', 'openai')
         
     Returns:
         bool: True if API is available, False otherwise
     """
     try:
-        # Get the directory where this script is located
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        config_path = os.path.join(script_dir, '..', '..', 'config', 'api_keys.yml')
-        
-        with open(config_path, 'r') as f:
-            config = yaml.safe_load(f)
-        
-        api_key = config.get(service_name, {}).get('api_key', '')
-        
-        # Check if key is available and not a placeholder
-        return api_key and api_key not in ["YOUR_" + service_name.upper() + "_API_KEY", "NOT_AVAILABLE"]
+        # Check if the secret key exists and has a valid value
+        if hasattr(st.secrets, service_name):
+            api_key = getattr(st.secrets, service_name)
+            # Check if the key is not empty and not a placeholder
+            if api_key and api_key not in ["YOUR_" + service_name.upper() + "_API_KEY", "NOT_AVAILABLE"]:
+                return True
+        return False
     except Exception as e:
-        logger.warning(f"Error checking API availability for {service_name}: {str(e)}")
+        logger.warning(f"Could not check Streamlit Secrets for {service_name}: {e}")
         return False
 
 def get_demo_sanctions_data():
